@@ -7,6 +7,9 @@
     "email": "StNekroman@gmail.com"
   },
   "license": "MIT",
+  "repository": {
+    "url": "git+https://github.com/StNekroman/aws-lambda-resource-remap.git"
+  },
   "main": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js"
