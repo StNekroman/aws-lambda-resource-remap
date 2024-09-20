@@ -1,0 +1,63 @@
+{
+  "name": "@stnekroman/aws-lambda-resource-remap",
+  "version": "1.0.0",
+  "description": "Magic tool, which generates new Cloudformation file from given one, but changing code location for lambdas. Allowing them to run via SAM CLI with Docker in WSL from Windows host.",
+  "author": {
+    "name": "StNekroman",
+    "email": "StNekroman@gmail.com"
+  },
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "aws-lambda-resource-remap": "./dist/index.js"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "sam",
+    "sam",
+    "cli",
+    "code",
+    "resource",
+    "remap",
+    "map",
+    "remapping",
+    "wsl",
+    "docker"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "build": "esbuild ./src/index.ts --bundle --platform=node --outfile=./dist/index.js --external:@aws-cdk/core --external:@aws-cdk/cloudformation-include",
+    "test": "yarn build & jest",
+    "lint": "eslint ./src",
+    "npm-publish": "npm publish --access public",
+    "npm-publish-github": "npm publish --access public --registry=https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "ts-command-line-args": "2.5.1",
+    "@stnekroman/tstools": "0.0.9"
+  },
+  "peerDependencies": {
+    "@aws-cdk/cloudformation-include": "^1.204.0",
+    "@aws-cdk/core": "^1.204.0"
+  },
+  "devDependencies": {
+    "@aws-cdk/cloudformation-include": "^1.204.0",
+    "@aws-cdk/core": "^1.204.0",
+    "@eslint/js": "^9.9.0",
+    "@jest/globals": "29.7.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "20.14.14",
+    "eslint": "^9.9.0",
+    "jest": "29.7.0",
+    "rimraf": "5.0.10",
+    "ts-jest": "29.2.4",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.1.0",
+    "esbuild": "0.23.1"
+  }
+}
