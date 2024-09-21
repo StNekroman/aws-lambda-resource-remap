@@ -89,6 +89,8 @@ Instead of suggested there "docker.exe/dockerd.exe" just create `docker.bat` fil
 @echo off
 wsl docker %*
 ```
-and add owning dir to PATH env variable.
+
+and add owning dir to PATH env variable.  
+
 ---
 License: MIT, good luck
