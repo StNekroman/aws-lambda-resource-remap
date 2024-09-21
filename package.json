@@ -1,6 +1,6 @@
 {
   "name": "@stnekroman/aws-lambda-resource-remap",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Magic tool, which generates new Cloudformation file from given one, but changing code location for lambdas. Allowing them to run via SAM CLI with Docker in WSL from Windows host.",
   "author": {
     "name": "StNekroman",
@@ -34,15 +34,14 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "build": "esbuild ./src/index.ts --bundle --platform=node --outfile=./dist/index.js --external:@aws-cdk/core --external:@aws-cdk/cloudformation-include",
-    "test": "yarn build & jest",
+    "build": "tsc --noEmit && esbuild ./src/index.ts --bundle --platform=node --outfile=./dist/index.js --external:@aws-cdk/core --external:@aws-cdk/cloudformation-include",
+    "test": "yarn build && jest",
     "lint": "eslint ./src",
     "npm-publish": "npm publish --access public",
     "npm-publish-github": "npm publish --access public --registry=https://npm.pkg.github.com"
   },
   "dependencies": {
-    "ts-command-line-args": "2.5.1",
-    "@stnekroman/tstools": "0.0.9"
+    "ts-command-line-args": "2.5.1"
   },
   "peerDependencies": {
     "@aws-cdk/cloudformation-include": "^1.204.0",

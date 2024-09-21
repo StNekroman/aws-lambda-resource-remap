@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-import * as fs from "fs";
-import { parse } from "ts-command-line-args";
 import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import * as cdk from "@aws-cdk/core";
-import { Objects } from "@stnekroman/tstools";
+import * as fs from "fs";
 import * as path from "path";
+import { parse } from "ts-command-line-args";
 
 interface Options {
   template : string;
@@ -26,6 +25,9 @@ export const args = parse<Options>({
   },
 });
 
+const LAMBDA_RESOURCE_TYPE = "AWS::Lambda::Function";
+const METADATA_ASSET_PATH = "aws:asset:path";
+
 const isWindows = process.platform === 'win32';
 if (!isWindows) {
   // Oh, not Windows98 --> do big nothing, return content as is
@@ -35,30 +37,30 @@ if (!isWindows) {
     })
   );
 } else {
-  const LAMBDA_RESOURCE_TYPE = "AWS::Lambda::Function";
-  const METADATA_ASSET_PATH = "aws:asset:path";
-
   if (args.newBasePath === undefined) {
     const dir = path.dirname(path.resolve(args.template));
     args.newBasePath = `/mnt/${dir[0].toLowerCase()}${dir.slice(2).replace(/\\/g, '/')}`;
   }
+  console.log(transformTemplate(args.template, args.newBasePath));
+}
 
+function transformTemplate(templatePath: string, newBasePath: string) : string {
   const app = new cdk.App();
   const stack = new cdk.Stack(app, "LoadTemplateStack");
   const template = new CfnInclude(stack, "ExistingTemplate", {
-    templateFile: args.template,
+    templateFile: templatePath
   });
 
   const resources = (template as unknown as { resources: Record<string, cdk.CfnElement> }).resources;
-  if (Objects.isNotNullOrUndefined(resources)) {
+  if (typeof resources === "object") {
     Object.keys(resources).map((ri) => template.getResource(ri))
       .filter((r) => r.cfnResourceType === LAMBDA_RESOURCE_TYPE)
       .forEach((r) => {
         let assetPath = r.getMetadata(METADATA_ASSET_PATH);
-        assetPath = path.join(args.newBasePath!, assetPath);
+        assetPath = path.join(newBasePath, assetPath);
         r.addMetadata(METADATA_ASSET_PATH, assetPath);
       });
   }
 
-  console.log(JSON.stringify(app.synth().getStackByName(stack.stackName).template, null, 1));
+  return JSON.stringify(app.synth().getStackByName(stack.stackName).template, null, 1);
 }
