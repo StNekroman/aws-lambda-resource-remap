@@ -24,13 +24,13 @@ anyway you will hit the error:
 
 SAM CLI starts a Docker container with required environment, with AWS bonuses.  
 Mounts directory to it as `/var/task`, directory usually is that one, which contains your CDK-generated Cloudformation stack template json, e.g. `cdk.out`.  
-So later, inside Docker, AWS ~~framework~~ python code tries to find and load required (fam lambda) code.  
+So later, inside Docker, AWS ~~framework~~ python code tries to find and load required (for lambda) code.  
 That python code for some magic reason uses CWD (current working dir) as base path and always resolves code location from that.  
 And everything works fine, while you run docker on the same machine.  
 But WSL - different thing, it's virtual machine actually.  
 So python code tries to load something on absolute path, but that path was built on Win environment. (including disk labels - "D:")  
 Thus nothing works.  
-You may thing that magic `--docker-volume-basedir` from [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-invoke.html) will resolve that.  
+You may think that magic `--docker-volume-basedir` from [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-invoke.html) will resolve that.  
 So theoretically you could pass `/mnt/d/dir`, WSL-style path to dir, which is already mounted.  
 But ~~yes~~ no, because AWS python code does [dirty magic](https://github.com/aws/aws-sam-cli/blob/537f3cefed2c8999c6bd6cebffac72666d811534/samcli/lib/utils/codeuri.py#L38) around absolutification of the path.  
 So you can pass there anything (`/mnt/d/dir`), but that line will transform your anything to win-env based abs path, which will start from disk latter, again.  
@@ -39,7 +39,7 @@ I don't think that this book-selling company will change that code anywhere soon
 ## So what?
 
 That's why this small npx tool was born.  
-Main idea of it - take CDK-generated Cloudformation tempalte json, modify lamble locations, dump new content and save it separately.  
+Main idea of it - take CDK-generated Cloudformation template json, modify lambda locations, dump new content and save it separately.  
 So later, new separate modified template file can be used to run local SAM things (`sam local invoke`, `sam local start-api`)
 
 ### Prerequisites
@@ -47,7 +47,7 @@ So later, new separate modified template file can be used to run local SAM thing
 Add this tool to your `devDependencies`:  
 
 ```json
-"@stnekroman/aws-lambda-resource-remap": "1.0.2"
+"@stnekroman/aws-lambda-resource-remap": "^1.0.4"
 ```
 This tool relies on some dependencies (but doesn't include them inside), which are mandatory:  
 
@@ -89,5 +89,6 @@ Instead of suggested there "docker.exe/dockerd.exe" just create `docker.bat` fil
 @echo off
 wsl docker %*
 ```
+and add owning dir to PATH env variable.
 ---
 License: MIT, good luck
