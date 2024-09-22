@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-import { CfnInclude } from "@aws-cdk/cloudformation-include";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
 import * as fs from "fs";
 import * as path from "path";
 import { parse } from "ts-command-line-args";
@@ -10,6 +9,7 @@ interface Options {
   template : string;
   newBasePath ?: string;
 }
+
 
 export const args = parse<Options>({
   template: {
@@ -46,8 +46,12 @@ if (!isWindows) {
 
 function transformTemplate(templatePath: string, newBasePath: string) : string {
   const app = new cdk.App();
-  const stack = new cdk.Stack(app, "LoadTemplateStack");
-  const template = new CfnInclude(stack, "ExistingTemplate", {
+  const stack = new cdk.Stack(app, "LoadTemplateStack", {
+    synthesizer: new cdk.DefaultStackSynthesizer({
+      generateBootstrapVersionRule: false
+    })
+  });
+  const template = new cdk.cloudformation_include.CfnInclude(stack, "ExistingTemplate", {
     templateFile: templatePath
   });
 

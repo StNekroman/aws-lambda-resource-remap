@@ -47,13 +47,13 @@ So later, new separate modified template file can be used to run local SAM thing
 Add this tool to your `devDependencies`:  
 
 ```json
-"@stnekroman/aws-lambda-resource-remap": "^1.0.4"
+"@stnekroman/aws-lambda-resource-remap": "^1.0.5"
 ```
 This tool relies on some dependencies (but doesn't include them inside), which are mandatory:  
 
 ```json
-"@aws-cdk/cloudformation-include": "^1.204.0",
-"@aws-cdk/core": "^1.204.0"
+"constructs": "^10.3.0",
+"aws-cdk-lib": "^2.159.1"
 ```
 install dependencies and now you can create custom step (or modify existing to add post-action):  
 
