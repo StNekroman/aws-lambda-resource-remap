@@ -78,6 +78,76 @@ Tool `aws-lambda-resource-remap` accepts two arguments:
 If `--newBasePath` specified - then fixed & predefined prefix will be used.  
 If `--newBasePath` not specified - then it will be auto-calcualted depending on `--template` argument.  
 
+---
+
+## Local debugging with sourcemaps  
+Two convenient options so far:  
+- run in cmd and attach debugger later
+- use extension for VSCode (AWS Toolkit) with special launch configuration
+
+### Attach debugger
+
+You may run command in cmd like `sam local invoke --profile dev --no-event -template ./cdk.out/local.template.json <LambdaFunctionName> --debug-port 5858`
+
+And your `.vscode/launch.json` will contain configuration like
+
+```json
+{
+  "type": "node",
+  "request": "attach",
+  "name": "Attach to Local Lambda",
+  "port": 5858,
+  "restart": false,
+  "skipFiles": [
+    "<node_internals>/**"
+  ],
+  "remoteRoot": "/var/task",
+  "localRoot": "${workspaceRoot}/dist/src/lambdas/HelloWorldFunction", // important to point location, where generated source map file exists
+  "sourceMaps": true
+}
+```
+
+Trick with `localRoot` is mandatory if you precomile TS code wit TSC and don't built-in source maps to JS file -  if they are stored near original js, in the same directory.
+
+### AWS Toolkit
+
+And your `.vscode/launch.json` will contain configuration like
+
+```json
+{
+  "type": "aws-sam",
+  "request": "direct-invoke",
+  "name": "Invoke local lambda",
+  "sam": {
+    "localArguments": [
+      "--template",
+      "${workspaceFolder}/cdk.out/local.template.json" // use patched local template.json
+    ]
+  },
+  "invokeTarget": {
+    "target": "code", // code | template
+    "projectRoot": "${workspaceFolder}/dist/src/lambdas/HelloWorldFunction", // points to directory with JS file, name of dir equals to name of lambda
+    "lambdaHandler": "index.handler" // filename (without ext) + "." + expoerted lambda function name
+  },
+  "lambda": {
+    "runtime": "nodejs20.x",
+    "payload": {
+      "json": {
+        "key1": "value1" // input event data
+      }
+    },
+    "environmentVariables": {} // env vars
+  }
+}
+```
+
+Here are two suboptions:  
+- `target=code` works, but due to [this magic code](https://github.com/aws/aws-toolkit-vscode/blob/46b409c3353ce0dafefb796f5994c1fa88a23b47/packages/core/src/shared/sam/localLambdaRunner.ts#L64) in AWS toolkit - it's mandatory to wrap JS file with lambda inside directory which must have the same name as lambda function name (which you define in CDK app, and which which is visible in generated Cloudformaition template) - that's **important**.
+- `target=template` didn't get it to work - always complains on missing (from somewhere) package.json
+
+
+---
+
 ## Installing Docker in WSL
 
 Read and do by manual:  

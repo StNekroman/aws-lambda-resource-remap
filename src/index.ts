@@ -46,10 +46,9 @@ if (!isWindows) {
 
 function transformTemplate(templatePath: string, newBasePath: string) : string {
   const app = new cdk.App();
+  
   const stack = new cdk.Stack(app, "LoadTemplateStack", {
-    synthesizer: new cdk.DefaultStackSynthesizer({
-      generateBootstrapVersionRule: false
-    })
+    synthesizer: new cdk.BootstraplessSynthesizer()
   });
   const template = new cdk.cloudformation_include.CfnInclude(stack, "ExistingTemplate", {
     templateFile: templatePath
